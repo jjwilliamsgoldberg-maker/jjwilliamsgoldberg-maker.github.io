@@ -1,24 +1,98 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-    <title>First webpage Yayy!!</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julian Williams-Goldberg | CS360</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .assignment-card {
+            background-color: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .assignment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .assignment-card h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .assignment-card p {
+            margin: 0 0 15px 0;
+            color: #666;
+        }
+        .assignment-link {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .assignment-link:hover {
+            background-color: #2980b9;
+        }
+        .about-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+    </style>
 </head>
-
 <body>
+    <h1>Julian Williams-Goldberg</h1>
+    <p class="subtitle">CS360 - Data Visualization</p>
     
-<h1>Julian Williams-Goldberg</h1>
+    <div class="about-section">
+        <p>Welcome to my portfolio for CS360. This site hosts my data visualization assignments and projects.</p>
+    </div>
 
-I am a Junior at <a href="https://www.usfca.edu">USF</a>.
+    <h2>Assignments</h2>
+    
+    <div class="assignment-card">
+        <h3>A2 - Introduction to P5.js</h3>
+        <p>Bar chart and dot plot visualizations of the Top 500 Novels dataset, showing the distribution of books by genre. Created using P5.js and Tableau.</p>
+        <a href="a2.html" class="assignment-link">View Assignment →</a>
+    </div>
 
-<ul>
-    <li>A2 - Introduction to P5</li>
-    <li>Bananas</li>
-    <li>Apples</li>
-</ul>
+    <!-- Future assignments can be added here -->
+    <!--
+    <div class="assignment-card">
+        <h3>A3 - Assignment Title</h3>
+        <p>Description of the assignment.</p>
+        <a href="a3.html" class="assignment-link">View Assignment →</a>
+    </div>
+    -->
 
 </body>
-
 </html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dot Plot - Books by Genre</title>
+    <!-- Load the P5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dot Plot: Books by Genre</h1>
+    <a href="a2.html">← Back to A2</a>
+    
+    <script>
+        let table;
+        let genreCounts = {};
+        let genres = [];
+        let counts = [];
+        let maxCount = 0;
+
+        // Preload runs before setup - load the CSV here
+        function preload() {
+            table = loadTable('data/novels.csv', 'csv', 'header');
+        }
+
+        function setup() {
+            createCanvas(900, 700);
+            
+            // Count books per genre
+            for (let i = 0; i < table.getRowCount(); i++) {
+                let genre = table.getString(i, 'genre');
+                
+                // Clean up the genre name
+                if (genre === '' || genre === 'na') {
+                    genre = 'Other';
+                }
+                
+                // Count it
+                if (genreCounts[genre]) {
+                    genreCounts[genre]++;
+                } else {
+                    genreCounts[genre] = 1;
+                }
+            }
+            
+            // Convert to arrays for easier plotting
+            for (let genre in genreCounts) {
+                genres.push(genre);
+                counts.push(genreCounts[genre]);
+                if (genreCounts[genre] > maxCount) {
+                    maxCount = genreCounts[genre];
+                }
+            }
+            
+            // Sort by count (descending)
+            let combined = genres.map((g, i) => ({ genre: g, count: counts[i] }));
+            combined.sort((a, b) => b.count - a.count);
+            genres = combined.map(item => item.genre);
+            counts = combined.map(item => item.count);
+        }
+
+        function draw() {
+            background(255);
+            
+            // Chart dimensions - horizontal dot plot (genres on Y-axis)
+            let marginLeft = 150;
+            let marginRight = 80;
+            let marginTop = 60;
+            let marginBottom = 60;
+            let chartWidth = width - marginLeft - marginRight;
+            let chartHeight = height - marginTop - marginBottom;
+            
+            // Draw title
+            fill(0);
+            textSize(20);
+            textAlign(CENTER);
+            text('Number of Books by Genre (Top 500 Novels)', width / 2, 35);
+            
+            // Draw axes
+            stroke(0);
+            strokeWeight(2);
+            // Y-axis
+            line(marginLeft, marginTop, marginLeft, height - marginBottom);
+            // X-axis
+            line(marginLeft, height - marginBottom, width - marginRight, height - marginBottom);
+            
+            // X-axis label
+            textSize(14);
+            textAlign(CENTER);
+            fill(0);
+            noStroke();
+            text('Count', width / 2, height - 20);
+            
+            // Calculate spacing between dots
+            let rowHeight = chartHeight / genres.length;
+            
+            // Round maxCount up to nice number for axis
+            let axisMax = Math.ceil(maxCount / 50) * 50;
+            
+            // Draw X-axis tick marks and labels
+            let numTicks = 5;
+            let tickInterval = axisMax / numTicks;
+            
+            textSize(12);
+            textAlign(CENTER, TOP);
+            fill(0);
+            
+            for (let i = 0; i <= numTicks; i++) {
+                let value = i * tickInterval;
+                let x = map(value, 0, axisMax, marginLeft, width - marginRight);
+                
+                // Tick mark
+                stroke(0);
+                strokeWeight(1);
+                line(x, height - marginBottom, x, height - marginBottom + 5);
+                
+                // Grid line (light gray)
+                stroke(230);
+                line(x, marginTop, x, height - marginBottom);
+                
+                // Label
+                noStroke();
+                fill(0);
+                text(int(value), x, height - marginBottom + 10);
+            }
+            
+            // Draw dots and Y-axis labels (genre names)
+            for (let i = 0; i < genres.length; i++) {
+                let y = marginTop + i * rowHeight + rowHeight / 2;
+                let x = map(counts[i], 0, axisMax, marginLeft, width - marginRight);
+                
+                // Horizontal guide line (subtle)
+                stroke(240);
+                strokeWeight(1);
+                line(marginLeft, y, width - marginRight, y);
+                
+                // Draw dot
+                fill(70, 130, 180); // Steel blue
+                stroke(50, 100, 150);
+                strokeWeight(2);
+                ellipse(x, y, 16, 16);
+                
+                // Draw count next to dot
+                fill(0);
+                noStroke();
+                textSize(10);
+                textAlign(LEFT, CENTER);
+                text(counts[i], x + 12, y);
+                
+                // Y-axis label (genre name)
+                textSize(11);
+                textAlign(RIGHT, CENTER);
+                fill(0);
+                text(genres[i], marginLeft - 10, y);
+                
+                // Y-axis tick mark
+                stroke(0);
+                strokeWeight(1);
+                line(marginLeft - 5, y, marginLeft, y);
+            }
+            
+            noLoop(); // Static chart - no need to keep redrawing
+        }
+    </script>
+</body>
+</html>

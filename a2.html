@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2 - Introduction to P5.js | Julian Williams-Goldberg</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .dataset-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .viz-link {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .viz-link:hover {
+            background-color: #2980b9;
+        }
+        .tableau-section {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tableau-section img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    
+    <h1>A2 - Introduction to P5.js</h1>
+    
+    <div class="dataset-info">
+        <strong>Dataset:</strong> Top 500 Novels Metadata<br>
+        <strong>Variable Visualized:</strong> Genre (count of books per genre)<br>
+        <strong>Data Source:</strong> CSV file loaded from <code>data/novels.csv</code>
+    </div>
+
+    <h2>P5.js Visualizations</h2>
+    <a href="bar-chart.html" class="viz-link">📊 Bar Chart - Books by Genre</a>
+    <a href="dot-plot.html" class="viz-link">🔵 Dot Plot - Books by Genre</a>
+
+    <h2>Tableau Visualizations</h2>
+    
+    <div class="tableau-section">
+        <h3>Bar Chart (Tableau)</h3>
+        <img src="images/tableau-bar.png" alt="Tableau Bar Chart - Books by Genre">
+    </div>
+    
+    <div class="tableau-section">
+        <h3>Dot Plot (Tableau)</h3>
+        <img src="images/tableau-dot.png" alt="Tableau Dot Plot - Books by Genre">
+    </div>
+
+</body>
+</html>
