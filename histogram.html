@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histogram - Publication Year</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>Histogram: Publication Year of Top 500 Novels</h1>
+    <a href="a3.html">← Back to A3</a>
+    
+    <script>
+        let table;
+        let years = [];
+        let bins = [];
+        let binCount = 15;
+        let minYear, maxYear, binWidth;
+
+        function preload() {
+            table = loadTable('data/novels.csv', 'csv', 'header');
+        }
+
+        function setup() {
+            createCanvas(900, 600);
+            
+            // Extract publication years
+            for (let i = 0; i < table.getRowCount(); i++) {
+                let year = table.getNum(i, 'pub_year');
+                if (year && !isNaN(year)) {
+                    years.push(year);
+                }
+            }
+            
+            // Calculate bin parameters
+            minYear = Math.floor(min(years) / 10) * 10; // Round down to decade
+            maxYear = Math.ceil(max(years) / 10) * 10;   // Round up to decade
+            binWidth = (maxYear - minYear) / binCount;
+            
+            // Initialize bins
+            for (let i = 0; i < binCount; i++) {
+                bins[i] = 0;
+            }
+            
+            // Count years into bins
+            for (let year of years) {
+                let binIndex = Math.floor((year - minYear) / binWidth);
+                if (binIndex >= binCount) binIndex = binCount - 1; // Handle edge case
+                bins[binIndex]++;
+            }
+        }
+
+        function draw() {
+            background(255);
+            
+            // Chart dimensions
+            let marginLeft = 80;
+            let marginRight = 40;
+            let marginTop = 60;
+            let marginBottom = 80;
+            let chartWidth = width - marginLeft - marginRight;
+            let chartHeight = height - marginTop - marginBottom;
+            
+            let maxBinCount = max(bins);
+            
+            // Draw title
+            fill(0);
+            noStroke();
+            textSize(20);
+            textAlign(CENTER);
+            text('Distribution of Publication Years (Top 500 Novels)', width / 2, 35);
+            
+            // Draw background grid (faint)
+            stroke(230);
+            strokeWeight(1);
+            let numGridLines = 6;
+            for (let i = 0; i <= numGridLines; i++) {
+                let y = map(i, 0, numGridLines, height - marginBottom, marginTop);
+                line(marginLeft, y, width - marginRight, y);
+            }
+            
+            // Vertical grid lines
+            for (let i = 0; i <= binCount; i++) {
+                let x = map(i, 0, binCount, marginLeft, width - marginRight);
+                line(x, marginTop, x, height - marginBottom);
+            }
+            
+            // Draw axes
+            stroke(0);
+            strokeWeight(2);
+            // Y-axis
+            line(marginLeft, marginTop, marginLeft, height - marginBottom);
+            // X-axis
+            line(marginLeft, height - marginBottom, width - marginRight, height - marginBottom);
+            
+            // Y-axis label
+            push();
+            translate(25, height / 2);
+            rotate(-PI / 2);
+            textSize(14);
+            textAlign(CENTER);
+            fill(0);
+            noStroke();
+            text('Frequency (Number of Books)', 0, 0);
+            pop();
+            
+            // X-axis label
+            textSize(14);
+            textAlign(CENTER);
+            fill(0);
+            noStroke();
+            text('Publication Year', width / 2, height - 15);
+            
+            // Y-axis tick marks and labels
+            textSize(11);
+            textAlign(RIGHT, CENTER);
+            let yTickInterval = Math.ceil(maxBinCount / numGridLines / 10) * 10;
+            
+            for (let i = 0; i <= numGridLines; i++) {
+                let value = i * yTickInterval;
+                let y = map(value, 0, numGridLines * yTickInterval, height - marginBottom, marginTop);
+                
+                // Tick mark
+                stroke(0);
+                strokeWeight(1);
+                line(marginLeft - 5, y, marginLeft, y);
+                
+                // Label
+                noStroke();
+                fill(0);
+                text(value, marginLeft - 10, y);
+            }
+            
+            // Draw histogram bars
+            let barWidth = chartWidth / binCount;
+            
+            for (let i = 0; i < binCount; i++) {
+                let x = marginLeft + i * barWidth;
+                let barHeight = map(bins[i], 0, numGridLines * yTickInterval, 0, chartHeight);
+                let y = height - marginBottom - barHeight;
+                
+                // Draw bar
+                fill(70, 130, 180);
+                stroke(50, 100, 150);
+                strokeWeight(1);
+                rect(x, y, barWidth - 2, barHeight);
+            }
+            
+            // X-axis tick marks and labels
+            textSize(10);
+            textAlign(CENTER, TOP);
+            fill(0);
+            
+            for (let i = 0; i <= binCount; i++) {
+                let x = marginLeft + i * barWidth;
+                let year = Math.round(minYear + i * binWidth);
+                
+                // Tick mark
+                stroke(0);
+                strokeWeight(1);
+                line(x, height - marginBottom, x, height - marginBottom + 5);
+                
+                // Label (show every other tick to avoid crowding)
+                if (i % 2 === 0 || i === binCount) {
+                    noStroke();
+                    text(year, x, height - marginBottom + 10);
+                }
+            }
+            
+            noLoop();
+        }
+    </script>
+</body>
+</html>

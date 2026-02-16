@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Plot - Goodreads Rating</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>Box Plot: Goodreads Average Rating</h1>
+    <a href="a3.html">← Back to A3</a>
+    
+    <script>
+        let table;
+        let ratings = [];
+        let minVal, maxVal, q1, median, q3;
+
+        function preload() {
+            table = loadTable('data/novels.csv', 'csv', 'header');
+        }
+
+        function setup() {
+            createCanvas(700, 500);
+            
+            // Extract Goodreads average ratings
+            for (let i = 0; i < table.getRowCount(); i++) {
+                let rating = table.getNum(i, 'gr_avg_rating');
+                if (rating && !isNaN(rating)) {
+                    ratings.push(rating);
+                }
+            }
+            
+            // Sort ratings for quartile calculation
+            ratings.sort((a, b) => a - b);
+            
+            // Calculate statistics
+            minVal = ratings[0];
+            maxVal = ratings[ratings.length - 1];
+            
+            // Median (Q2)
+            let midIndex = Math.floor(ratings.length / 2);
+            if (ratings.length % 2 === 0) {
+                median = (ratings[midIndex - 1] + ratings[midIndex]) / 2;
+            } else {
+                median = ratings[midIndex];
+            }
+            
+            // Q1 (median of lower half)
+            let lowerHalf = ratings.slice(0, midIndex);
+            let q1Index = Math.floor(lowerHalf.length / 2);
+            if (lowerHalf.length % 2 === 0) {
+                q1 = (lowerHalf[q1Index - 1] + lowerHalf[q1Index]) / 2;
+            } else {
+                q1 = lowerHalf[q1Index];
+            }
+            
+            // Q3 (median of upper half)
+            let upperHalf = ratings.length % 2 === 0 
+                ? ratings.slice(midIndex) 
+                : ratings.slice(midIndex + 1);
+            let q3Index = Math.floor(upperHalf.length / 2);
+            if (upperHalf.length % 2 === 0) {
+                q3 = (upperHalf[q3Index - 1] + upperHalf[q3Index]) / 2;
+            } else {
+                q3 = upperHalf[q3Index];
+            }
+        }
+
+        function draw() {
+            background(255);
+            
+            // Chart dimensions
+            let marginLeft = 80;
+            let marginRight = 80;
+            let marginTop = 80;
+            let marginBottom = 100;
+            let chartWidth = width - marginLeft - marginRight;
+            let chartHeight = height - marginTop - marginBottom;
+            
+            // Scale range (add padding)
+            let scaleMin = Math.floor(minVal * 10) / 10 - 0.1;
+            let scaleMax = Math.ceil(maxVal * 10) / 10 + 0.1;
+            
+            // Draw title
+            fill(0);
+            noStroke();
+            textSize(20);
+            textAlign(CENTER);
+            text('Distribution of Goodreads Average Ratings', width / 2, 35);
+            text('(Top 500 Novels)', width / 2, 58);
+            
+            // Draw background grid
+            stroke(230);
+            strokeWeight(1);
+            let numGridLines = 8;
+            for (let i = 0; i <= numGridLines; i++) {
+                let x = map(i, 0, numGridLines, marginLeft, width - marginRight);
+                line(x, marginTop, x, height - marginBottom);
+            }
+            
+            // Draw axis
+            stroke(0);
+            strokeWeight(2);
+            line(marginLeft, height - marginBottom, width - marginRight, height - marginBottom);
+            
+            // X-axis label
+            textSize(14);
+            textAlign(CENTER);
+            fill(0);
+            noStroke();
+            text('Goodreads Average Rating', width / 2, height - 20);
+            
+            // X-axis tick marks and labels
+            textSize(11);
+            textAlign(CENTER, TOP);
+            
+            for (let i = 0; i <= numGridLines; i++) {
+                let value = scaleMin + (i / numGridLines) * (scaleMax - scaleMin);
+                let x = map(value, scaleMin, scaleMax, marginLeft, width - marginRight);
+                
+                // Tick mark
+                stroke(0);
+                strokeWeight(1);
+                line(x, height - marginBottom, x, height - marginBottom + 5);
+                
+                // Label
+                noStroke();
+                fill(0);
+                text(value.toFixed(1), x, height - marginBottom + 10);
+            }
+            
+            // Box plot dimensions
+            let boxHeight = 100;
+            let boxY = marginTop + (chartHeight - boxHeight) / 2;
+            let centerY = boxY + boxHeight / 2;
+            
+            // Map values to x positions
+            let minX = map(minVal, scaleMin, scaleMax, marginLeft, width - marginRight);
+            let q1X = map(q1, scaleMin, scaleMax, marginLeft, width - marginRight);
+            let medianX = map(median, scaleMin, scaleMax, marginLeft, width - marginRight);
+            let q3X = map(q3, scaleMin, scaleMax, marginLeft, width - marginRight);
+            let maxX = map(maxVal, scaleMin, scaleMax, marginLeft, width - marginRight);
+            
+            // Draw whiskers (lines from min to Q1 and Q3 to max)
+            stroke(0);
+            strokeWeight(2);
+            
+            // Left whisker
+            line(minX, centerY, q1X, centerY);
+            line(minX, boxY + 20, minX, boxY + boxHeight - 20); // End cap
+            
+            // Right whisker
+            line(q3X, centerY, maxX, centerY);
+            line(maxX, boxY + 20, maxX, boxY + boxHeight - 20); // End cap
+            
+            // Draw box (Q1 to Q3)
+            fill(70, 130, 180);
+            stroke(50, 100, 150);
+            strokeWeight(2);
+            rect(q1X, boxY, q3X - q1X, boxHeight);
+            
+            // Draw median line
+            stroke(255, 255, 255);
+            strokeWeight(3);
+            line(medianX, boxY, medianX, boxY + boxHeight);
+            
+            // Draw labels for statistics
+            fill(0);
+            noStroke();
+            textSize(11);
+            textAlign(CENTER, TOP);
+            
+            let labelY = boxY + boxHeight + 15;
+            
+            // Min label
+            text('Min', minX, labelY);
+            text(minVal.toFixed(2), minX, labelY + 14);
+            
+            // Q1 label
+            text('Q1', q1X, labelY);
+            text(q1.toFixed(2), q1X, labelY + 14);
+            
+            // Median label
+            text('Median', medianX, labelY);
+            text(median.toFixed(2), medianX, labelY + 14);
+            
+            // Q3 label
+            text('Q3', q3X, labelY);
+            text(q3.toFixed(2), q3X, labelY + 14);
+            
+            // Max label
+            text('Max', maxX, labelY);
+            text(maxVal.toFixed(2), maxX, labelY + 14);
+            
+            noLoop();
+        }
+    </script>
+</body>
+</html>

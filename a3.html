@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A3 - Visualizing Distributions | Julian Williams-Goldberg</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .dataset-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .dataset-info a {
+            color: #3498db;
+        }
+        .viz-link {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .viz-link:hover {
+            background-color: #2980b9;
+        }
+        .seaborn-section {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .seaborn-section img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    
+    <h1>A3 - Visualizing Distributions</h1>
+    
+    <div class="dataset-info">
+        <strong>Dataset:</strong> <a href="https://www.responsible-datasets-in-context.com/posts/top-500-novels/top-500-novels.html" target="_blank">Top 500 Novels Metadata</a><br>
+        <strong>Variables Visualized:</strong><br>
+        • Histogram: Publication Year (pub_year)<br>
+        • Box Plot: Goodreads Average Rating (gr_avg_rating)<br>
+        <strong>Data Source:</strong> CSV file loaded from <code>data/novels.csv</code>
+    </div>
+
+    <h2>P5.js Visualizations</h2>
+    <a href="histogram.html" class="viz-link">Histogram - Publication Year Distribution</a>
+    <a href="box-plot.html" class="viz-link">Box Plot - Goodreads Average Rating</a>
+
+    <h2>Seaborn Visualizations</h2>
+    
+    <div class="seaborn-section">
+        <h3>Histogram (Seaborn)</h3>
+        <img src="images/seaborn-histogram.png" alt="Seaborn Histogram - Publication Year">
+    </div>
+    
+    <div class="seaborn-section">
+        <h3>Box Plot (Seaborn)</h3>
+        <img src="images/seaborn-boxplot.png" alt="Seaborn Box Plot - Goodreads Rating">
+    </div>
+
+</body>
+</html>
