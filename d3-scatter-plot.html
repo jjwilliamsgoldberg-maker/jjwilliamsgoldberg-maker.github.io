@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatter Plot in D3 - Publication Year vs Rating</title>
+    <!-- Load D3.js library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .dot {
+            fill: steelblue;
+            opacity: 0.7;
+        }
+        .dot:hover {
+            fill: #e74c3c;
+            opacity: 1;
+        }
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scatter Plot: Publication Year vs Goodreads Rating (D3.js)</h1>
+    <a href="a4.html">← Back to A4</a>
+    
+    <!-- SVG container will be added here by D3 -->
+    <div id="chart"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Scatter Plot Tutorial: https://d3-graph-gallery.com/graph/scatter_basic.html
+         * - D3 Documentation: https://d3js.org/
+         */
+
+        // Set dimensions and margins
+        const margin = {top: 60, right: 30, bottom: 70, left: 80};
+        const width = 900 - margin.left - margin.right;
+        const height = 550 - margin.top - margin.bottom;
+
+        // Create SVG element
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Filter and parse data - only include rows with valid year and rating
+            const scatterData = data
+                .filter(d => d.pub_year && d.gr_avg_rating && !isNaN(+d.pub_year) && !isNaN(+d.gr_avg_rating))
+                .map(d => ({
+                    year: +d.pub_year,
+                    rating: +d.gr_avg_rating,
+                    title: d.title
+                }));
+
+            // Create X scale (Publication Year)
+            const x = d3.scaleLinear()
+                .domain([d3.min(scatterData, d => d.year) - 10, d3.max(scatterData, d => d.year) + 10])
+                .range([0, width]);
+
+            // Create Y scale (Goodreads Rating)
+            const y = d3.scaleLinear()
+                .domain([d3.min(scatterData, d => d.rating) - 0.2, d3.max(scatterData, d => d.rating) + 0.2])
+                .range([height, 0]);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Add X axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", height + 50)
+                .text("Publication Year");
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -50)
+                .text("Goodreads Average Rating");
+
+            // Add chart title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -25)
+                .text("Publication Year vs Goodreads Rating (Top 500 Novels)");
+
+            // Add dots
+            svg.selectAll(".dot")
+                .data(scatterData)
+                .enter()
+                .append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(d.year))
+                .attr("cy", d => y(d.rating))
+                .attr("r", 5);
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>

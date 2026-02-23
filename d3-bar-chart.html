@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Chart in D3 - Books by Genre</title>
+    <!-- Load D3.js library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .bar {
+            fill: steelblue;
+        }
+        .bar:hover {
+            fill: #2980b9;
+        }
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .data-label {
+            font-size: 11px;
+            fill: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bar Chart: Books by Genre (D3.js)</h1>
+    <a href="a4.html">← Back to A4</a>
+    
+    <!-- SVG container will be added here by D3 -->
+    <div id="chart"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Bar Chart Tutorial: https://d3-graph-gallery.com/graph/barplot_basic.html
+         * - D3 Documentation: https://d3js.org/
+         */
+
+        // Set dimensions and margins
+        const margin = {top: 60, right: 30, bottom: 120, left: 80};
+        const width = 900 - margin.left - margin.right;
+        const height = 550 - margin.top - margin.bottom;
+
+        // Create SVG element
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Count books by genre
+            const genreCounts = d3.rollup(data, v => v.length, d => d.genre || 'Other');
+            
+            // Convert to array and sort by count descending
+            let genreData = Array.from(genreCounts, ([genre, count]) => ({
+                genre: genre === 'na' || genre === '' ? 'Other' : genre,
+                count: count
+            }));
+            
+            // Combine any duplicate 'Other' entries
+            const otherCount = genreData
+                .filter(d => d.genre === 'Other')
+                .reduce((sum, d) => sum + d.count, 0);
+            genreData = genreData.filter(d => d.genre !== 'Other');
+            if (otherCount > 0) {
+                genreData.push({genre: 'Other', count: otherCount});
+            }
+            
+            // Sort by count descending
+            genreData.sort((a, b) => b.count - a.count);
+
+            // Create X scale
+            const x = d3.scaleBand()
+                .domain(genreData.map(d => d.genre))
+                .range([0, width])
+                .padding(0.2);
+
+            // Create Y scale
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(genreData, d => d.count) * 1.1])
+                .range([height, 0]);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end")
+                .attr("dx", "-0.5em")
+                .attr("dy", "0.5em");
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Add X axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 10)
+                .text("Genre");
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -50)
+                .text("Number of Books");
+
+            // Add chart title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -25)
+                .text("Distribution of Books by Genre (Top 500 Novels)");
+
+            // Add bars
+            svg.selectAll(".bar")
+                .data(genreData)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.genre))
+                .attr("y", d => y(d.count))
+                .attr("width", x.bandwidth())
+                .attr("height", d => height - y(d.count));
+
+            // Add data labels on each bar
+            svg.selectAll(".data-label")
+                .data(genreData)
+                .enter()
+                .append("text")
+                .attr("class", "data-label")
+                .attr("text-anchor", "middle")
+                .attr("x", d => x(d.genre) + x.bandwidth() / 2)
+                .attr("y", d => y(d.count) - 5)
+                .text(d => d.count);
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>
