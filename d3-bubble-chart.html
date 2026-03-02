@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Chart in D3 - Top 500 Novels</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .legend-title {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .legend-item {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bubble Chart: Top 500 Novels (D3.js)</h1>
+    <a href="a5.html">← Back to A5</a>
+    
+    <div id="chart"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Bubble Chart: https://d3-graph-gallery.com/graph/bubble_basic.html
+         * - D3 Color Scales: https://d3js.org/d3-scale-chromatic
+         * - D3 Documentation: https://d3js.org/
+         */
+
+        // Set dimensions and margins
+        const margin = {top: 60, right: 150, bottom: 70, left: 80};
+        const width = 1000 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+
+        // Create SVG element
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Filter and parse data
+            const bubbleData = data
+                .filter(d => d.pub_year && d.gr_avg_rating && d.gr_num_ratings && 
+                            !isNaN(+d.pub_year) && !isNaN(+d.gr_avg_rating) && !isNaN(+d.gr_num_ratings))
+                .map(d => ({
+                    year: +d.pub_year,
+                    rating: +d.gr_avg_rating,
+                    numRatings: +d.gr_num_ratings,
+                    genre: (d.genre === 'na' || d.genre === '') ? 'Other' : d.genre,
+                    title: d.title,
+                    author: d.author
+                }));
+
+            // Get unique genres for color scale
+            const genres = [...new Set(bubbleData.map(d => d.genre))].sort();
+
+            // Create scales
+            const x = d3.scaleLinear()
+                .domain([d3.min(bubbleData, d => d.year) - 10, d3.max(bubbleData, d => d.year) + 10])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([d3.min(bubbleData, d => d.rating) - 0.2, d3.max(bubbleData, d => d.rating) + 0.2])
+                .range([height, 0]);
+
+            // Size scale (square root for accurate area perception)
+            const size = d3.scaleSqrt()
+                .domain([0, d3.max(bubbleData, d => d.numRatings)])
+                .range([3, 25]);
+
+            // Color scale
+            const color = d3.scaleOrdinal()
+                .domain(genres)
+                .range(d3.schemeTableau10);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Add X axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", height + 50)
+                .text("Publication Year");
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -50)
+                .text("Goodreads Average Rating");
+
+            // Add chart title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -30)
+                .text("Top 500 Novels: Year, Rating, Popularity & Genre");
+
+            // Add subtitle explaining dimensions
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -10)
+                .attr("font-size", "12px")
+                .attr("fill", "#666")
+                .text("Bubble size = Number of Ratings | Color = Genre");
+
+            // Add bubbles
+            svg.selectAll("circle")
+                .data(bubbleData)
+                .enter()
+                .append("circle")
+                .attr("cx", d => x(d.year))
+                .attr("cy", d => y(d.rating))
+                .attr("r", d => size(d.numRatings))
+                .attr("fill", d => color(d.genre))
+                .attr("opacity", 0.7)
+                .attr("stroke", "#333")
+                .attr("stroke-width", 0.5);
+
+            // Add legend for genre colors
+            const legend = svg.append("g")
+                .attr("transform", `translate(${width + 20}, 0)`);
+
+            legend.append("text")
+                .attr("class", "legend-title")
+                .attr("x", 0)
+                .attr("y", 0)
+                .text("Genre");
+
+            genres.forEach((genre, i) => {
+                const legendRow = legend.append("g")
+                    .attr("transform", `translate(0, ${i * 20 + 15})`);
+
+                legendRow.append("circle")
+                    .attr("cx", 6)
+                    .attr("cy", 0)
+                    .attr("r", 6)
+                    .attr("fill", color(genre))
+                    .attr("opacity", 0.7);
+
+                legendRow.append("text")
+                    .attr("class", "legend-item")
+                    .attr("x", 18)
+                    .attr("y", 4)
+                    .text(genre.length > 12 ? genre.substring(0, 12) + '...' : genre);
+            });
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>

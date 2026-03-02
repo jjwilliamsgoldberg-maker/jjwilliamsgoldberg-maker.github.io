@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatterplot Matrix in D3 - Top 500 Novels</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .cell-frame {
+            fill: none;
+            stroke: #aaa;
+        }
+        .cell-label {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .dot {
+            fill: steelblue;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scatterplot Matrix: Top 500 Novels (D3.js)</h1>
+    <a href="a5.html">← Back to A5</a>
+    
+    <div id="chart"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Scatterplot Matrix: https://observablehq.com/@d3/splom
+         * - D3 Brush: https://github.com/d3/d3-brush
+         * - D3 Documentation: https://d3js.org/
+         */
+
+        // Variables to display in the matrix
+        const variables = [
+            { key: 'pub_year', label: 'Publication Year' },
+            { key: 'gr_avg_rating', label: 'Avg Rating' },
+            { key: 'gr_num_ratings', label: 'Num Ratings' }
+        ];
+
+        // Matrix dimensions
+        const size = 200;  // Size of each cell
+        const padding = 20;
+        const margin = {top: 60, right: 30, bottom: 30, left: 60};
+        const n = variables.length;
+        const fullWidth = n * size + margin.left + margin.right;
+        const fullHeight = n * size + margin.top + margin.bottom;
+
+        // Create SVG element
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", fullWidth)
+            .attr("height", fullHeight)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Add chart title
+        svg.append("text")
+            .attr("class", "title")
+            .attr("text-anchor", "middle")
+            .attr("x", (n * size) / 2)
+            .attr("y", -30)
+            .text("Scatterplot Matrix: Publication Year, Rating & Popularity");
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Filter and parse data
+            const matrixData = data
+                .filter(d => d.pub_year && d.gr_avg_rating && d.gr_num_ratings && 
+                            !isNaN(+d.pub_year) && !isNaN(+d.gr_avg_rating) && !isNaN(+d.gr_num_ratings))
+                .map(d => ({
+                    pub_year: +d.pub_year,
+                    gr_avg_rating: +d.gr_avg_rating,
+                    gr_num_ratings: +d.gr_num_ratings,
+                    title: d.title
+                }));
+
+            // Create scales for each variable
+            const scales = {};
+            variables.forEach(v => {
+                const extent = d3.extent(matrixData, d => d[v.key]);
+                const paddingAmount = (extent[1] - extent[0]) * 0.05;
+                scales[v.key] = d3.scaleLinear()
+                    .domain([extent[0] - paddingAmount, extent[1] + paddingAmount])
+                    .range([padding, size - padding]);
+            });
+
+            // Create axis generators
+            const axisGenerators = {};
+            variables.forEach(v => {
+                axisGenerators[v.key] = {
+                    x: d3.axisBottom(scales[v.key]).ticks(5).tickSize(size - padding * 2),
+                    y: d3.axisLeft(scales[v.key]).ticks(5).tickSize(-(size - padding * 2))
+                };
+            });
+
+            // Draw each cell in the matrix
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const cell = svg.append("g")
+                        .attr("transform", `translate(${j * size},${i * size})`);
+
+                    // Add cell frame
+                    cell.append("rect")
+                        .attr("class", "cell-frame")
+                        .attr("x", padding)
+                        .attr("y", padding)
+                        .attr("width", size - padding * 2)
+                        .attr("height", size - padding * 2);
+
+                    const xVar = variables[j].key;
+                    const yVar = variables[i].key;
+
+                    if (i === j) {
+                        // Diagonal: show variable name
+                        cell.append("text")
+                            .attr("class", "cell-label")
+                            .attr("x", size / 2)
+                            .attr("y", size / 2)
+                            .attr("text-anchor", "middle")
+                            .attr("dominant-baseline", "middle")
+                            .text(variables[i].label);
+                    } else {
+                        // Off-diagonal: show scatterplot
+                        const xScale = scales[xVar];
+                        const yScale = scales[yVar];
+
+                        // Add dots
+                        cell.selectAll(".dot")
+                            .data(matrixData)
+                            .enter()
+                            .append("circle")
+                            .attr("class", "dot")
+                            .attr("cx", d => xScale(d[xVar]))
+                            .attr("cy", d => size - yScale(d[yVar]) + padding * 2)
+                            .attr("r", 2.5);
+                    }
+
+                    // Add x-axis on bottom row
+                    if (i === n - 1) {
+                        cell.append("g")
+                            .attr("transform", `translate(0,${size - padding})`)
+                            .call(d3.axisBottom(scales[xVar]).ticks(4).tickFormat(d => {
+                                if (xVar === 'gr_num_ratings') return d3.format(".2s")(d);
+                                if (xVar === 'pub_year') return d3.format("d")(d);
+                                return d3.format(".1f")(d);
+                            }))
+                            .selectAll("text")
+                            .attr("font-size", "8px");
+                    }
+
+                    // Add y-axis on left column
+                    if (j === 0) {
+                        cell.append("g")
+                            .attr("transform", `translate(${padding},0)`)
+                            .call(d3.axisLeft(d3.scaleLinear()
+                                .domain(scales[yVar].domain())
+                                .range([size - padding, padding]))
+                                .ticks(4).tickFormat(d => {
+                                    if (yVar === 'gr_num_ratings') return d3.format(".2s")(d);
+                                    if (yVar === 'pub_year') return d3.format("d")(d);
+                                    return d3.format(".1f")(d);
+                                }))
+                            .selectAll("text")
+                            .attr("font-size", "8px");
+                    }
+                }
+            }
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>

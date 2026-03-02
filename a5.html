@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A5 - Advanced D3 Visualizations | Julian Williams-Goldberg</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .dataset-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .dataset-info a {
+            color: #3498db;
+        }
+        .viz-link {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .viz-link:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    
+    <h1>A5 - Advanced D3 Visualizations</h1>
+    
+    <div class="dataset-info">
+        <strong>Dataset:</strong> <a href="https://www.responsible-datasets-in-context.com/posts/top-500-novels/top-500-novels.html" target="_blank">Top 500 Novels Metadata</a><br>
+        <strong>Variables Visualized:</strong><br>
+        • Bubble Chart: Publication Year (x), Rating (y), Number of Ratings (size), Genre (color)<br>
+        • Line Chart: Average Goodreads Rating by Decade<br>
+        • Scatterplot Matrix: Publication Year, Average Rating, Number of Ratings<br>
+        <strong>Data Source:</strong> CSV file loaded from <code>data/novels.csv</code>
+    </div>
+
+    <h2>D3.js Visualizations</h2>
+    <a href="d3-bubble-chart.html" class="viz-link">Bubble Chart in D3 - Four Dimensions of Novel Data</a>
+    <a href="d3-line-chart.html" class="viz-link">Line Chart in D3 - Rating Trends Over Time</a>
+    <a href="d3-scatterplot-matrix.html" class="viz-link">Scatterplot Matrix in D3 - Variable Relationships</a>
+
+</body>
+</html>
