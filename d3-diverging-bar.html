@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diverging Bar Chart - Genre Rating Deviation</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .subtitle {
+            font-size: 12px;
+            fill: #666;
+        }
+        .zero-line {
+            stroke: #333;
+            stroke-width: 1;
+            stroke-dasharray: 4,2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Diverging Color Scale: Genre Rating Deviation</h1>
+    <a href="a6.html">← Back to A6</a>
+    
+    <div id="chart"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Diverging Scales: https://d3js.org/d3-scale-chromatic/diverging
+         * - d3-legend library: https://d3-legend.susielu.com/
+         * - D3 Bar Chart: https://d3-graph-gallery.com/graph/barplot_horizontal.html
+         */
+
+        // Set dimensions and margins
+        const margin = {top: 80, right: 150, bottom: 60, left: 100};
+        const width = 900 - margin.left - margin.right;
+        const height = 500 - margin.top - margin.bottom;
+
+        // Create SVG element
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Calculate overall average rating
+            const validData = data.filter(d => d.gr_avg_rating && !isNaN(+d.gr_avg_rating));
+            const overallAvg = d3.mean(validData, d => +d.gr_avg_rating);
+            
+            // Calculate average rating by genre
+            const genreRatings = d3.rollup(
+                validData,
+                v => d3.mean(v, d => +d.gr_avg_rating),
+                d => (d.genre === 'na' || d.genre === '') ? 'Other' : d.genre
+            );
+            
+            // Convert to array with deviation from overall average
+            let genreData = Array.from(genreRatings, ([genre, avgRating]) => ({
+                genre: genre,
+                avgRating: avgRating,
+                deviation: avgRating - overallAvg
+            }));
+            
+            // Sort by deviation
+            genreData.sort((a, b) => b.deviation - a.deviation);
+
+            // Find max absolute deviation for symmetric scale
+            const maxDeviation = d3.max(genreData, d => Math.abs(d.deviation));
+
+            // Create Y scale (genres)
+            const y = d3.scaleBand()
+                .domain(genreData.map(d => d.genre))
+                .range([0, height])
+                .padding(0.2);
+
+            // Create X scale (deviation)
+            const x = d3.scaleLinear()
+                .domain([-maxDeviation * 1.1, maxDeviation * 1.1])
+                .range([0, width]);
+
+            // Create Diverging color scale
+            const colorScale = d3.scaleDiverging()
+                .domain([-maxDeviation, 0, maxDeviation])
+                .interpolator(d3.interpolateRdYlGn);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d => d.toFixed(2)));
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Add zero line
+            svg.append("line")
+                .attr("class", "zero-line")
+                .attr("x1", x(0))
+                .attr("x2", x(0))
+                .attr("y1", 0)
+                .attr("y2", height);
+
+            // Add X axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", height + 45)
+                .text("Deviation from Average Rating");
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -80)
+                .text("Genre");
+
+            // Add chart title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -45)
+                .text("Genre Rating Deviation from Average (Diverging Color Scale)");
+
+            // Add subtitle
+            svg.append("text")
+                .attr("class", "subtitle")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -25)
+                .text(`Overall Average Rating: ${overallAvg.toFixed(2)} | Green = Above Average, Red = Below Average`);
+
+            // Add bars with diverging color
+            svg.selectAll(".bar")
+                .data(genreData)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("y", d => y(d.genre))
+                .attr("x", d => d.deviation > 0 ? x(0) : x(d.deviation))
+                .attr("width", d => Math.abs(x(d.deviation) - x(0)))
+                .attr("height", y.bandwidth())
+                .attr("fill", d => colorScale(d.deviation));
+
+            // Add data labels
+            svg.selectAll(".data-label")
+                .data(genreData)
+                .enter()
+                .append("text")
+                .attr("class", "data-label")
+                .attr("y", d => y(d.genre) + y.bandwidth() / 2 + 4)
+                .attr("x", d => d.deviation > 0 ? x(d.deviation) + 5 : x(d.deviation) - 5)
+                .attr("text-anchor", d => d.deviation > 0 ? "start" : "end")
+                .attr("font-size", "10px")
+                .text(d => d.deviation.toFixed(3));
+
+            // Create color legend using d3-legend
+            const legendScale = d3.scaleDiverging()
+                .domain([-maxDeviation, 0, maxDeviation])
+                .interpolator(d3.interpolateRdYlGn);
+
+            const legendDiverging = d3.legendColor()
+                .shapeWidth(30)
+                .cells(7)
+                .orient('vertical')
+                .scale(legendScale)
+                .title("Rating Deviation")
+                .labelFormat(d3.format(".2f"));
+
+            svg.append("g")
+                .attr("class", "legendDiverging")
+                .attr("transform", `translate(${width + 20}, 20)`)
+                .call(legendDiverging);
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>

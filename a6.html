@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A6 - Color Scales in D3 | Julian Williams-Goldberg</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .dataset-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .dataset-info a {
+            color: #3498db;
+        }
+        .viz-link {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .viz-link:hover {
+            background-color: #2980b9;
+        }
+        .color-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .sequential {
+            background-color: #3498db;
+        }
+        .diverging {
+            background-color: #e74c3c;
+        }
+        .qualitative {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    
+    <h1>A6 - Color Scales in D3</h1>
+    
+    <div class="dataset-info">
+        <strong>Dataset:</strong> <a href="https://www.responsible-datasets-in-context.com/posts/top-500-novels/top-500-novels.html" target="_blank">Top 500 Novels Metadata</a><br>
+        <strong>Color Scale Types Used:</strong><br>
+        • Sequential: d3.interpolateBlues (book counts)<br>
+        • Diverging: d3.interpolateRdYlGn (rating deviation from average)<br>
+        • Qualitative: d3.schemeCategory10 (genre categories)<br>
+        <strong>Legend Library:</strong> <a href="https://d3-legend.susielu.com/" target="_blank">d3-legend by Susie Lu</a>
+    </div>
+
+    <h2>D3.js Visualizations with Color Scales</h2>
+    <a href="d3-sequential-bar.html" class="viz-link">
+        Bar Chart - Books by Genre <span class="color-type sequential">Sequential</span>
+    </a>
+    <a href="d3-diverging-bar.html" class="viz-link">
+        Diverging Bar Chart - Genre Rating Deviation <span class="color-type diverging">Diverging</span>
+    </a>
+    <a href="d3-qualitative-scatter.html" class="viz-link">
+        Scatterplot - Year vs Rating by Genre <span class="color-type qualitative">Qualitative</span>
+    </a>
+
+</body>
+</html>
