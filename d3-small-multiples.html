@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Small Multiples - Genre Trends Over Time</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .main-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .cell-title {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .axis-label {
+            font-size: 10px;
+        }
+        .line {
+            fill: none;
+            stroke-width: 2;
+        }
+        .cell-frame {
+            fill: #fff;
+            stroke: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Small Multiples: Genre Rating Trends</h1>
+    <a href="a7.html">← Back to A7</a>
+    
+    <div id="chart"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Small Multiples: https://d3-graph-gallery.com/graph/area_smallmultiple.html
+         * - d3-legend library: https://d3-legend.susielu.com/
+         * - D3 Documentation: https://d3js.org/
+         */
+
+        // Small multiple dimensions
+        const cellWidth = 200;
+        const cellHeight = 120;
+        const cellPadding = 30;
+        const cols = 4;
+        const margin = {top: 80, right: 150, bottom: 40, left: 60};
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Filter valid data
+            const validData = data.filter(d => 
+                d.pub_year && d.gr_avg_rating && d.genre &&
+                !isNaN(+d.pub_year) && !isNaN(+d.gr_avg_rating) &&
+                d.genre !== 'na' && d.genre !== '' &&
+                +d.pub_year >= 1850
+            ).map(d => ({
+                year: +d.pub_year,
+                decade: Math.floor(+d.pub_year / 10) * 10,
+                rating: +d.gr_avg_rating,
+                genre: d.genre
+            }));
+
+            // Get top 8 genres by count
+            const genreCounts = d3.rollup(validData, v => v.length, d => d.genre);
+            const topGenres = Array.from(genreCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8)
+                .map(d => d[0]);
+
+            // Filter to only top genres
+            const filteredData = validData.filter(d => topGenres.includes(d.genre));
+
+            // Group by genre and decade, calculate average rating
+            const nestedData = d3.rollup(
+                filteredData,
+                v => d3.mean(v, d => d.rating),
+                d => d.genre,
+                d => d.decade
+            );
+
+            // Get all decades
+            const allDecades = [...new Set(filteredData.map(d => d.decade))].sort();
+
+            // Convert to array format
+            const smallMultiplesData = topGenres.map(genre => {
+                const decadeMap = nestedData.get(genre);
+                const values = allDecades
+                    .filter(decade => decadeMap && decadeMap.has(decade))
+                    .map(decade => ({
+                        decade: decade,
+                        rating: decadeMap.get(decade)
+                    }));
+                return {
+                    genre: genre,
+                    values: values
+                };
+            });
+
+            // Calculate rows needed
+            const rows = Math.ceil(topGenres.length / cols);
+            const totalWidth = cols * (cellWidth + cellPadding) + margin.left + margin.right;
+            const totalHeight = rows * (cellHeight + cellPadding) + margin.top + margin.bottom;
+
+            // Create SVG
+            const svg = d3.select("#chart")
+                .append("svg")
+                .attr("width", totalWidth)
+                .attr("height", totalHeight)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Add main title
+            svg.append("text")
+                .attr("class", "main-title")
+                .attr("text-anchor", "middle")
+                .attr("x", (cols * (cellWidth + cellPadding)) / 2)
+                .attr("y", -50)
+                .text("Average Goodreads Rating by Decade (Top 8 Genres)");
+
+            // Create scales (shared across all cells)
+            const x = d3.scaleLinear()
+                .domain(d3.extent(allDecades))
+                .range([5, cellWidth - 5]);
+
+            const y = d3.scaleLinear()
+                .domain([3.2, 4.5])
+                .range([cellHeight - 5, 5]);
+
+            const color = d3.scaleOrdinal()
+                .domain(topGenres)
+                .range(d3.schemeCategory10);
+
+            // Create line generator
+            const line = d3.line()
+                .x(d => x(d.decade))
+                .y(d => y(d.rating))
+                .curve(d3.curveMonotoneX);
+
+            // Create small multiples
+            smallMultiplesData.forEach((genreData, i) => {
+                const row = Math.floor(i / cols);
+                const col = i % cols;
+                const xPos = col * (cellWidth + cellPadding);
+                const yPos = row * (cellHeight + cellPadding);
+
+                const cell = svg.append("g")
+                    .attr("transform", `translate(${xPos},${yPos})`);
+
+                // Cell background
+                cell.append("rect")
+                    .attr("class", "cell-frame")
+                    .attr("width", cellWidth)
+                    .attr("height", cellHeight)
+                    .attr("rx", 3);
+
+                // Cell title
+                cell.append("text")
+                    .attr("class", "cell-title")
+                    .attr("x", cellWidth / 2)
+                    .attr("y", -8)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", color(genreData.genre))
+                    .text(genreData.genre);
+
+                // X axis (only on bottom row)
+                if (row === rows - 1) {
+                    cell.append("g")
+                        .attr("transform", `translate(0,${cellHeight})`)
+                        .call(d3.axisBottom(x).ticks(4).tickFormat(d => `${d}`))
+                        .selectAll("text")
+                        .attr("font-size", "8px");
+                }
+
+                // Y axis (only on first column)
+                if (col === 0) {
+                    cell.append("g")
+                        .call(d3.axisLeft(y).ticks(3))
+                        .selectAll("text")
+                        .attr("font-size", "8px");
+                }
+
+                // Line
+                if (genreData.values.length > 1) {
+                    cell.append("path")
+                        .datum(genreData.values)
+                        .attr("class", "line")
+                        .attr("stroke", color(genreData.genre))
+                        .attr("d", line);
+
+                    // Dots
+                    cell.selectAll(".dot")
+                        .data(genreData.values)
+                        .enter()
+                        .append("circle")
+                        .attr("cx", d => x(d.decade))
+                        .attr("cy", d => y(d.rating))
+                        .attr("r", 2.5)
+                        .attr("fill", color(genreData.genre));
+                }
+            });
+
+            // Create color legend using d3-legend
+            const legendOrdinal = d3.legendColor()
+                .shape("line")
+                .shapeWidth(25)
+                .orient('vertical')
+                .scale(color)
+                .title("Genre");
+
+            svg.append("g")
+                .attr("class", "legendOrdinal")
+                .attr("transform", `translate(${cols * (cellWidth + cellPadding) + 10}, 0)`)
+                .call(legendOrdinal);
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>

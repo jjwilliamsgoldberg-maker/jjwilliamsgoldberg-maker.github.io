@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlapping Area Chart - Books by Decade</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .area {
+            opacity: 0.6;
+        }
+        .area:hover {
+            opacity: 0.9;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <h1>Overlapping Area Chart: Books Published by Decade</h1>
+    <a href="a7.html">← Back to A7</a>
+    
+    <div id="chart"></div>
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Area Chart: https://d3-graph-gallery.com/graph/area_basic.html
+         * - D3 Stacked Area: https://d3-graph-gallery.com/graph/stackedarea_template.html
+         * - d3-legend library: https://d3-legend.susielu.com/
+         * - D3 Documentation: https://d3js.org/
+         */
+
+        // Set dimensions and margins
+        const margin = {top: 60, right: 180, bottom: 70, left: 80};
+        const width = 950 - margin.left - margin.right;
+        const height = 500 - margin.top - margin.bottom;
+
+        // Create SVG element
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Tooltip element
+        const tooltip = d3.select("#tooltip");
+
+        // Load data from CSV
+        d3.csv("data/novels.csv").then(function(data) {
+            
+            // Filter valid data
+            const validData = data.filter(d => 
+                d.pub_year && d.genre &&
+                !isNaN(+d.pub_year) &&
+                d.genre !== 'na' && d.genre !== '' &&
+                +d.pub_year >= 1800
+            ).map(d => ({
+                year: +d.pub_year,
+                decade: Math.floor(+d.pub_year / 10) * 10,
+                genre: d.genre,
+                title: d.title
+            }));
+
+            // Get top 5 genres by count
+            const genreCounts = d3.rollup(validData, v => v.length, d => d.genre);
+            const topGenres = Array.from(genreCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(d => d[0]);
+
+            // Filter to only top genres
+            const filteredData = validData.filter(d => topGenres.includes(d.genre));
+
+            // Count books by decade and genre
+            const nestedData = d3.rollup(
+                filteredData,
+                v => v.length,
+                d => d.decade,
+                d => d.genre
+            );
+
+            // Get all decades
+            const allDecades = [...new Set(filteredData.map(d => d.decade))].sort();
+
+            // Convert to format for area chart
+            const areaData = topGenres.map(genre => {
+                const values = allDecades.map(decade => {
+                    const decadeData = nestedData.get(decade);
+                    const count = decadeData ? (decadeData.get(genre) || 0) : 0;
+                    return {
+                        decade: decade,
+                        count: count
+                    };
+                });
+                return {
+                    genre: genre,
+                    values: values
+                };
+            });
+
+            // Create scales
+            const x = d3.scaleLinear()
+                .domain(d3.extent(allDecades))
+                .range([0, width]);
+
+            const maxCount = d3.max(areaData, d => d3.max(d.values, v => v.count));
+            const y = d3.scaleLinear()
+                .domain([0, maxCount * 1.1])
+                .range([height, 0]);
+
+            const color = d3.scaleOrdinal()
+                .domain(topGenres)
+                .range(d3.schemeCategory10);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d3.format("d")).ticks(10));
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(6));
+
+            // Add grid lines
+            svg.append("g")
+                .attr("class", "grid")
+                .attr("opacity", 0.1)
+                .call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
+
+            // Add X axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", height + 50)
+                .text("Decade");
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -50)
+                .text("Number of Books");
+
+            // Add chart title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("text-anchor", "middle")
+                .attr("x", width / 2)
+                .attr("y", -30)
+                .text("Books Published by Decade (Top 5 Genres)");
+
+            // Create area generator
+            const area = d3.area()
+                .x(d => x(d.decade))
+                .y0(height)
+                .y1(d => y(d.count))
+                .curve(d3.curveMonotoneX);
+
+            // Add areas for each genre (in reverse order so first genre is on top)
+            areaData.slice().reverse().forEach(genreData => {
+                svg.append("path")
+                    .datum(genreData.values)
+                    .attr("class", "area")
+                    .attr("fill", color(genreData.genre))
+                    .attr("d", area)
+                    .on("mouseover", function(event) {
+                        d3.select(this).attr("opacity", 0.9);
+                        tooltip.style("opacity", 1);
+                    })
+                    .on("mousemove", function(event) {
+                        const [mouseX] = d3.pointer(event);
+                        const decade = Math.round(x.invert(mouseX) / 10) * 10;
+                        const dataPoint = genreData.values.find(d => d.decade === decade);
+                        const count = dataPoint ? dataPoint.count : 0;
+                        
+                        tooltip.html(`<strong>${genreData.genre}</strong><br/>Decade: ${decade}s<br/>Books: ${count}`)
+                            .style("left", (event.pageX + 15) + "px")
+                            .style("top", (event.pageY - 30) + "px");
+                    })
+                    .on("mouseout", function() {
+                        d3.select(this).attr("opacity", 0.6);
+                        tooltip.style("opacity", 0);
+                    });
+            });
+
+            // Create color legend using d3-legend
+            const legendOrdinal = d3.legendColor()
+                .shape("rect")
+                .shapeWidth(20)
+                .shapeHeight(20)
+                .orient('vertical')
+                .scale(color)
+                .title("Genre");
+
+            svg.append("g")
+                .attr("class", "legendOrdinal")
+                .attr("transform", `translate(${width + 20}, 20)`)
+                .call(legendOrdinal);
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>
