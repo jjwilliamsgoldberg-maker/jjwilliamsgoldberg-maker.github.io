@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjacency Matrix</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .cell {
+            stroke: #fff;
+            stroke-width: 0.5px;
+        }
+        .cell:hover {
+            stroke: #333;
+            stroke-width: 2px;
+        }
+        .row-label, .col-label {
+            font-size: 9px;
+        }
+        .highlight {
+            fill: #ffeb3b !important;
+            opacity: 0.3;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .axis-label {
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Adjacency Matrix</h1>
+    <a href="a8.html">← Back to A8</a>
+    
+    <div id="chart"></div>
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Adjacency Matrix: https://d3-graph-gallery.com/graph/network_matrix.html
+         * - D3 Heatmap: https://d3-graph-gallery.com/heatmap.html
+         * - d3-legend library: https://d3-legend.susielu.com/
+         * - Network Repository Dataset: http://networkrepository.com/fb-pages-government.php
+         */
+
+        const margin = {top: 120, right: 150, bottom: 50, left: 120};
+        const cellSize = 15;
+        
+        const tooltip = d3.select("#tooltip");
+
+        // Load both CSV files
+        Promise.all([
+            d3.csv("data/network-nodes.csv"),
+            d3.csv("data/network-edges.csv")
+        ]).then(function([nodes, links]) {
+            
+            // Parse data
+            nodes = nodes.map(d => ({
+                id: +d.id,
+                name: d.name,
+                group: +d.group
+            }));
+
+            links = links.map(d => ({
+                source: +d.source,
+                target: +d.target
+            }));
+
+            const n = nodes.length;
+            const width = n * cellSize;
+            const height = n * cellSize;
+
+            // Create adjacency matrix
+            const matrix = [];
+            const nodeMap = new Map(nodes.map(d => [d.id, d]));
+            
+            // Initialize matrix
+            nodes.forEach((source, i) => {
+                nodes.forEach((target, j) => {
+                    matrix.push({
+                        x: j,
+                        y: i,
+                        source: source,
+                        target: target,
+                        connected: false
+                    });
+                });
+            });
+
+            // Fill in connections
+            links.forEach(link => {
+                const sourceIdx = nodes.findIndex(n => n.id === link.source);
+                const targetIdx = nodes.findIndex(n => n.id === link.target);
+                if (sourceIdx >= 0 && targetIdx >= 0) {
+                    matrix[sourceIdx * n + targetIdx].connected = true;
+                    matrix[targetIdx * n + sourceIdx].connected = true; // Symmetric
+                }
+            });
+
+            // Create SVG
+            const svg = d3.select("#chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Add title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("x", width / 2)
+                .attr("y", -90)
+                .attr("text-anchor", "middle")
+                .text("FB Government Pages Adjacency Matrix");
+
+            // Create color scale
+            const color = d3.scaleOrdinal()
+                .domain([1, 2, 3, 4, 5])
+                .range(d3.schemeCategory10);
+
+            // Add row highlight rectangles (hidden by default)
+            const rowHighlights = svg.append("g")
+                .attr("class", "row-highlights")
+                .selectAll("rect")
+                .data(nodes)
+                .enter()
+                .append("rect")
+                .attr("class", "row-highlight")
+                .attr("x", 0)
+                .attr("y", (d, i) => i * cellSize)
+                .attr("width", width)
+                .attr("height", cellSize)
+                .attr("fill", "none");
+
+            // Add column highlight rectangles (hidden by default)
+            const colHighlights = svg.append("g")
+                .attr("class", "col-highlights")
+                .selectAll("rect")
+                .data(nodes)
+                .enter()
+                .append("rect")
+                .attr("class", "col-highlight")
+                .attr("x", (d, i) => i * cellSize)
+                .attr("y", 0)
+                .attr("width", cellSize)
+                .attr("height", height)
+                .attr("fill", "none");
+
+            // Add cells
+            svg.append("g")
+                .attr("class", "cells")
+                .selectAll("rect")
+                .data(matrix)
+                .enter()
+                .append("rect")
+                .attr("class", "cell")
+                .attr("x", d => d.x * cellSize)
+                .attr("y", d => d.y * cellSize)
+                .attr("width", cellSize)
+                .attr("height", cellSize)
+                .attr("fill", d => d.connected ? color(d.source.group) : "#eee")
+                .on("mouseover", function(event, d) {
+                    // Highlight row and column
+                    d3.selectAll(".row-highlight")
+                        .filter((_, i) => i === d.y)
+                        .attr("fill", "#ffeb3b")
+                        .attr("opacity", 0.3);
+                    
+                    d3.selectAll(".col-highlight")
+                        .filter((_, i) => i === d.x)
+                        .attr("fill", "#ffeb3b")
+                        .attr("opacity", 0.3);
+
+                    // Highlight labels
+                    d3.selectAll(".row-label")
+                        .filter((_, i) => i === d.y)
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#e74c3c");
+                    
+                    d3.selectAll(".col-label")
+                        .filter((_, i) => i === d.x)
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#e74c3c");
+
+                    tooltip.html(`<strong>${d.source.name}</strong> → <strong>${d.target.name}</strong><br/>` +
+                                `Connected: ${d.connected ? "Yes" : "No"}`)
+                        .style("left", (event.pageX + 15) + "px")
+                        .style("top", (event.pageY - 30) + "px")
+                        .style("opacity", 1);
+                })
+                .on("mouseout", function() {
+                    // Remove highlights
+                    d3.selectAll(".row-highlight, .col-highlight")
+                        .attr("fill", "none");
+                    
+                    d3.selectAll(".row-label, .col-label")
+                        .attr("font-weight", "normal")
+                        .attr("fill", "#333");
+
+                    tooltip.style("opacity", 0);
+                });
+
+            // Add row labels (left side)
+            svg.append("g")
+                .attr("class", "row-labels")
+                .selectAll("text")
+                .data(nodes)
+                .enter()
+                .append("text")
+                .attr("class", "row-label")
+                .attr("x", -5)
+                .attr("y", (d, i) => i * cellSize + cellSize / 2)
+                .attr("dy", "0.35em")
+                .attr("text-anchor", "end")
+                .attr("fill", "#333")
+                .text(d => d.name.replace("User_", ""));
+
+            // Add column labels (top)
+            svg.append("g")
+                .attr("class", "col-labels")
+                .selectAll("text")
+                .data(nodes)
+                .enter()
+                .append("text")
+                .attr("class", "col-label")
+                .attr("x", (d, i) => i * cellSize + cellSize / 2)
+                .attr("y", -5)
+                .attr("text-anchor", "start")
+                .attr("fill", "#333")
+                .attr("transform", (d, i) => `rotate(-90, ${i * cellSize + cellSize / 2}, -5)`)
+                .text(d => d.name.replace("User_", ""));
+
+            // Add axis labels
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("x", -60)
+                .attr("y", height / 2)
+                .attr("text-anchor", "middle")
+                .attr("transform", `rotate(-90, -60, ${height / 2})`)
+                .text("Source Node");
+
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("x", width / 2)
+                .attr("y", -70)
+                .attr("text-anchor", "middle")
+                .text("Target Node");
+
+            // Create color legend
+            const legendOrdinal = d3.legendColor()
+                .shape("rect")
+                .shapeWidth(15)
+                .shapeHeight(15)
+                .orient('vertical')
+                .scale(color)
+                .title("Category")
+                .labels(["Military", "Diplomatic", "Local Gov", "Health", "Other"]);
+
+            svg.append("g")
+                .attr("class", "legendOrdinal")
+                .attr("transform", `translate(${width + 20}, 20)`)
+                .call(legendOrdinal);
+
+        }).catch(function(error) {
+            console.error("Error loading CSV:", error);
+        });
+    </script>
+</body>
+</html>
