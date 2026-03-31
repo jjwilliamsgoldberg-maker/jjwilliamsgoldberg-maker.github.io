@@ -37,7 +37,7 @@
         }
         .link {
             fill: none;
-            stroke-opacity: 0.4;
+            stroke-opacity: 0.5;
             stroke-width: 1.5px;
         }
         .link:hover {
@@ -129,9 +129,6 @@
             // Sort nodes by group for better bundling
             nodes.sort((a, b) => a.group - b.group || a.id - b.id);
 
-            // Create a map for quick lookup
-            const nodeById = new Map(nodes.map((d, i) => [d.id, {...d, index: i}]));
-
             // Calculate positions on a circle
             const angleStep = (2 * Math.PI) / nodes.length;
             nodes.forEach((node, i) => {
@@ -141,6 +138,9 @@
                 node.innerX = Math.cos(node.angle) * innerRadius;
                 node.innerY = Math.sin(node.angle) * innerRadius;
             });
+
+            // Create a map for quick lookup (AFTER positions are calculated)
+            const nodeById = new Map(nodes.map(d => [d.id, d]));
 
             // Create curved path generator with bundling
             const bundle = d3.line()
