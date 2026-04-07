@@ -3,125 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Julian Williams-Goldberg | CS360</title>
+    <title>CS360 Data Visualization Portfolio</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Georgia, serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
         }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #34495e;
-            margin-top: 40px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        .assignment-card {
-            background-color: white;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .assignment-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .assignment-card h3 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-        }
-        .assignment-card p {
-            margin: 0 0 15px 0;
-            color: #666;
-        }
-        .assignment-link {
-            display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 50px; }
+        h1 { font-size: 3rem; color: #e94560; margin-bottom: 15px; text-shadow: 0 0 30px rgba(233, 69, 96, 0.3); }
+        .subtitle { color: #a0a0a0; font-size: 1.2rem; }
+        .student-info { color: #4ecca3; margin-top: 10px; font-size: 1rem; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            display: block;
         }
-        .assignment-link:hover {
-            background-color: #2980b9;
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(233, 69, 96, 0.5);
         }
-        .about-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
+        .card-header { padding: 20px; background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(78, 204, 163, 0.1)); }
+        .card-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .card-title { font-size: 1.3rem; color: #fff; margin-bottom: 5px; }
+        .card-grade { font-size: 0.85rem; color: #4ecca3; font-weight: bold; }
+        .card-body { padding: 20px; }
+        .card-description { color: #b0b0b0; font-size: 0.9rem; line-height: 1.5; }
+        .card-topics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .topic-tag { background: rgba(78, 204, 163, 0.2); color: #4ecca3; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; }
+        footer { text-align: center; margin-top: 50px; color: #666; font-size: 0.9rem; }
+        footer a { color: #e94560; text-decoration: none; }
     </style>
 </head>
 <body>
-    <h1>Julian Williams-Goldberg</h1>
-    <p class="subtitle">CS360 - Data Visualization</p>
-    
-    <div class="about-section">
-        <p>Welcome to my portfolio for CS360. This site hosts my data visualization assignments and projects.</p>
+    <div class="container">
+        <header>
+            <h1>📊 CS360 Data Visualization</h1>
+            <p class="subtitle">University of San Francisco • Spring 2026</p>
+            <p class="student-info">Julian Williams-Goldberg</p>
+        </header>
+        <div class="cards-grid">
+            <a href="a2.html" class="card">
+                <div class="card-header"><div class="card-icon">📊</div><h2 class="card-title">A2: Introduction to P5.js</h2><span class="card-grade">Grade: B</span></div>
+                <div class="card-body"><p class="card-description">Bar chart and dot plot visualizations using P5.js.</p><div class="card-topics"><span class="topic-tag">P5.js</span><span class="topic-tag">Bar Chart</span></div></div>
+            </a>
+            <a href="a3.html" class="card">
+                <div class="card-header"><div class="card-icon">📈</div><h2 class="card-title">A3: Visualizing Distributions</h2><span class="card-grade">Grade: B</span></div>
+                <div class="card-body"><p class="card-description">Histogram and box plot visualizations.</p><div class="card-topics"><span class="topic-tag">P5.js</span><span class="topic-tag">Histogram</span></div></div>
+            </a>
+            <a href="a4.html" class="card">
+                <div class="card-header"><div class="card-icon">📉</div><h2 class="card-title">A4: Introduction to D3</h2><span class="card-grade">Grade: B</span></div>
+                <div class="card-body"><p class="card-description">First D3.js bar chart and scatter plot.</p><div class="card-topics"><span class="topic-tag">D3.js</span><span class="topic-tag">Bar Chart</span></div></div>
+            </a>
+            <a href="a5.html" class="card">
+                <div class="card-header"><div class="card-icon">🔮</div><h2 class="card-title">A5: Advanced D3</h2><span class="card-grade">Grade: A</span></div>
+                <div class="card-body"><p class="card-description">Bubble chart, line chart, and scatterplot matrix.</p><div class="card-topics"><span class="topic-tag">D3.js</span><span class="topic-tag">SPLOM</span></div></div>
+            </a>
+            <a href="a6.html" class="card">
+                <div class="card-header"><div class="card-icon">🎨</div><h2 class="card-title">A6: Color Scales</h2><span class="card-grade">Grade: A</span></div>
+                <div class="card-body"><p class="card-description">Sequential, diverging, and qualitative color scales.</p><div class="card-topics"><span class="topic-tag">D3.js</span><span class="topic-tag">Color Scales</span></div></div>
+            </a>
+            <a href="a7.html" class="card">
+                <div class="card-header"><div class="card-icon">📅</div><h2 class="card-title">A7: Time Series</h2><span class="card-grade">Grade: A</span></div>
+                <div class="card-body"><p class="card-description">Multi-line chart, area chart, and small multiples.</p><div class="card-topics"><span class="topic-tag">D3.js</span><span class="topic-tag">Time Series</span></div></div>
+            </a>
+            <a href="a8.html" class="card">
+                <div class="card-header"><div class="card-icon">🕸️</div><h2 class="card-title">A8: Network Visualization</h2><span class="card-grade">Grade: A</span></div>
+                <div class="card-body"><p class="card-description">Force-directed graph, adjacency matrix, edge bundling.</p><div class="card-topics"><span class="topic-tag">D3.js</span><span class="topic-tag">Networks</span></div></div>
+            </a>
+            <a href="a9.html" class="card">
+                <div class="card-header"><div class="card-icon">🗺️</div><h2 class="card-title">A9: Geospatial Visualization</h2><span class="card-grade">Grade: B</span></div>
+                <div class="card-body"><p class="card-description">Proportional symbols map of US cost of living by state.</p><div class="card-topics"><span class="topic-tag">D3.js</span><span class="topic-tag">Geospatial</span><span class="topic-tag">TopoJSON</span></div></div>
+            </a>
+        </div>
+        <footer><p>Built with D3.js, P5.js, and ❤️</p></footer>
     </div>
-
-    <h2>Assignments</h2>
-    
-    <div class="assignment-card">
-        <h3>A2 - Introduction to P5.js</h3>
-        <p>Bar chart and dot plot visualizations of the Top 500 Novels dataset, showing the distribution of books by genre. Created using P5.js and Tableau.</p>
-        <a href="a2.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <div class="assignment-card">
-        <h3>A3 - Visualizing Distributions</h3>
-        <p>Histogram and box plot visualizations of the Top 500 Novels dataset, showing the distribution of publication years and Goodreads ratings. Created using P5.js and Seaborn.</p>
-        <a href="a3.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <div class="assignment-card">
-        <h3>A4 - D3 Visualizations</h3>
-        <p>Bar chart and scatter plot visualizations of the Top 500 Novels dataset using D3.js. Shows books by genre and the relationship between publication year and Goodreads rating.</p>
-        <a href="a4.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <div class="assignment-card">
-        <h3>A5 - Advanced D3 Visualizations</h3>
-        <p>Bubble chart, line chart, and scatterplot matrix of the Top 500 Novels dataset using D3.js. Explores multiple dimensions including time trends and variable relationships.</p>
-        <a href="a5.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <div class="assignment-card">
-        <h3>A6 - Color Scales in D3</h3>
-        <p>Exploring sequential, diverging, and qualitative color scales in D3.js with proper legends using the d3-legend library.</p>
-        <a href="a6.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <div class="assignment-card">
-        <h3>A7 - Time Series in D3</h3>
-        <p>Multi-line chart, overlapping area chart, and small multiples visualizing time series data from the Top 500 Novels dataset.</p>
-        <a href="a7.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <div class="assignment-card">
-        <h3>A8 - Network Visualization</h3>
-        <p>Force-directed node-link diagram, adjacency matrix, and hierarchical edge bundling using the Academia social network dataset.</p>
-        <a href="a8.html" class="assignment-link">View Assignment →</a>
-    </div>
-
-    <!-- Future assignments can be added here -->
-
 </body>
 </html>
