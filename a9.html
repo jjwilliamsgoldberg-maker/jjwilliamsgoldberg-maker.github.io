@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A9: Geospatial Data Visualization</title>
+    <title>A9 - Geospatial Visualization | Julian Williams-Goldberg</title>
     <style>
         body {
             font-family: Georgia, serif;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 900px;
+            margin: 50px auto;
             padding: 20px;
             background-color: #f5f5f5;
+            color: #333;
         }
         h1 {
             color: #2c3e50;
@@ -19,95 +20,57 @@
         }
         h2 {
             color: #34495e;
-            margin-top: 30px;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
+            margin-top: 40px;
         }
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .dataset-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .dataset-info a {
+            color: #3498db;
         }
         .viz-link {
             display: block;
-            background: white;
+            background-color: #3498db;
+            color: white;
             padding: 15px 20px;
             margin: 10px 0;
+            text-decoration: none;
             border-radius: 5px;
-            border: 1px solid #ddd;
-            transition: all 0.2s;
+            transition: background-color 0.3s;
         }
         .viz-link:hover {
-            background: #ecf0f1;
-            border-color: #3498db;
-            text-decoration: none;
-        }
-        .viz-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .viz-desc {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        .data-section {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 30px;
-        }
-        .data-section ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-        .data-section li {
-            margin: 8px 0;
+            background-color: #2980b9;
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">← Back to Portfolio</a>
+    <a href="index.html" class="back-link">← Back to Home</a>
     
-    <h1>A9: Geospatial Data Visualization</h1>
+    <h1>A9 - Geospatial Visualization</h1>
     
-    <p>This assignment explores geospatial visualization using D3.js, creating a proportional symbols map to visualize US state cost of living data.</p>
-    
-    <h2>Visualization</h2>
-    
-    <a href="d3-proportional-symbols.html" class="viz-link">
-        <div class="viz-title">📍 Proportional Symbols Map: US Cost of Living</div>
-        <div class="viz-desc">Bubble size represents cost of living index, color represents housing cost. Hover for details.</div>
-    </a>
-    
-    <div class="data-section">
-        <h2>Data Sources</h2>
-        <ul>
-            <li><strong>Cost of Living Data:</strong> <a href="data/expensive-states.csv">expensive-states.csv</a> - Contains costRank, State, costIndex, groceryCost, housingCost, utilitiesCost, transportationCost, and miscCost</li>
-            <li><strong>State Centroids:</strong> <a href="data/state-centroids.csv">state-centroids.csv</a> - Latitude and longitude coordinates for each US state centroid</li>
-        </ul>
-        
-        <h2>Features</h2>
-        <ul>
-            <li>Proportional symbols (circles) sized by Cost of Living Index</li>
-            <li>Color encoding for Housing Cost using sequential red scale</li>
-            <li>Interactive tooltips showing state details on hover</li>
-            <li>Size legend showing cost index values</li>
-            <li>Color legend showing housing cost scale</li>
-        </ul>
-        
-        <h2>References</h2>
-        <ul>
-            <li><a href="https://d3js.org/d3-geo/projection">D3 Geo Projections</a></li>
-            <li><a href="https://github.com/topojson/topojson">TopoJSON</a></li>
-            <li><a href="https://d3-legend.susielu.com/">d3-legend by Susie Lu</a></li>
-            <li><a href="https://d3-graph-gallery.com/graph/bubblemap_basic.html">D3 Bubble Map Tutorial</a></li>
-        </ul>
+    <div class="dataset-info">
+        <strong>Data Sources:</strong><br>
+        • <a href="data/expensive-states.csv">expensive-states.csv</a> - Cost of living data by state<br>
+        • <a href="data/state-centroids.csv">state-centroids.csv</a> - Latitude and longitude coordinates for each state centroid<br><br>
+        <strong>Libraries Used:</strong> D3.js, TopoJSON, d3-legend
     </div>
+
+    <h2>D3.js Visualization</h2>
+    <a href="d3-proportional-symbols.html" class="viz-link">
+        Proportional Symbols Map - US Cost of Living
+    </a>
+
 </body>
 </html>
