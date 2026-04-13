@@ -1,0 +1,9 @@
+[
+  { "week": 1, "hours_gaming": 6, "exam_score": 78 },
+  { "week": 2, "hours_gaming": 8, "exam_score": 81 },
+  { "week": 3, "hours_gaming": 10, "exam_score": 84 },
+  { "week": 4, "hours_gaming": 12, "exam_score": 88 },
+  { "week": 5, "hours_gaming": 14, "exam_score": 90 },
+  { "week": 6, "hours_gaming": 16, "exam_score": 91 },
+  { "week": 7, "hours_gaming": 18, "exam_score": 93 }
+]

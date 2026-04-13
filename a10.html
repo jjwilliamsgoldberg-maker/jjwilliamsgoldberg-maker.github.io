@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A10 - Misleading Visualizations | Julian Williams-Goldberg</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .grade-target {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .dataset-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .dataset-info a {
+            color: #3498db;
+        }
+        .viz-link {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .viz-link:hover {
+            background-color: #2980b9;
+        }
+        .viz-link.deceptive {
+            background-color: #e74c3c;
+        }
+        .viz-link.deceptive:hover {
+            background-color: #c0392b;
+        }
+        .viz-link.ethical {
+            background-color: #27ae60;
+        }
+        .viz-link.ethical:hover {
+            background-color: #1e8449;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    
+    <div class="grade-target">Target Grade: C (75)</div>
+    
+    <h1>A10 - Misleading Visualizations</h1>
+    
+    <p>This assignment explores how data visualizations can be manipulated to support false narratives, and how to create ethical alternatives that represent data honestly.</p>
+    
+    <div class="dataset-info">
+        <strong>Dataset:</strong> <a href="data/gaming-data.json">gaming-data.json</a><br><br>
+        <strong>Description:</strong> This dataset represents a fictional student's weekly hours spent playing video games and their corresponding exam scores over a 7-week period. The data contains 7 data points with three fields: week number, hours spent gaming, and exam score.<br><br>
+        <strong>Misleading Claim:</strong> "Playing more video games directly improves academic performance."
+    </div>
+
+    <h2>D3.js Visualizations</h2>
+    
+    <a href="d3-deceptive-chart.html" class="viz-link deceptive">
+        Deceptive Chart - Manipulated to Support False Claim
+    </a>
+    
+    <a href="d3-ethical-chart.html" class="viz-link ethical">
+        Ethical Chart - Honest Representation of Same Data
+    </a>
+    
+    <a href="d3-comparison.html" class="viz-link">
+        Side-by-Side Comparison
+    </a>
+
+    <h2>Manipulation Techniques Used</h2>
+    <ol>
+        <li><strong>Truncated Y-Axis:</strong> Starting the y-axis at 75 instead of 0 makes a 15-point improvement appear as a dramatic near-vertical climb.</li>
+        <li><strong>Exaggerated Aspect Ratio:</strong> Using a tall, narrow chart (high height-to-width ratio) visually steepens the slope, making the trend appear more significant.</li>
+    </ol>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethical Chart - Gaming vs Exam Scores</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 10px;
+        }
+        a {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .caption {
+            max-width: 600px;
+            text-align: center;
+            color: #555;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        .ethical-note {
+            background-color: #e8f5e9;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+        .ethical-note h3 {
+            color: #27ae60;
+            margin-top: 0;
+        }
+        .axis-label {
+            font-size: 12px;
+            fill: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ethical Chart</h1>
+    <h2>Gaming Hours vs Exam Scores (Honest Representation)</h2>
+    <a href="a10.html">← Back to A10</a>
+    
+    <div class="chart-container">
+        <div id="chart"></div>
+    </div>
+    
+    <p class="caption">
+        <strong>Figure 2:</strong> Exam scores for one student over 7 weeks. While there is a correlation 
+        between gaming hours and scores, this single-student sample cannot establish causation. 
+        Other factors like study time, exam difficulty, and sleep were not controlled.
+    </p>
+    
+    <div class="ethical-note">
+        <h3>Ethical Design Choices:</h3>
+        <ol>
+            <li><strong>Y-Axis Starts at 0:</strong> Shows the true proportion of change (78→93 is only a 15-point increase out of 100).</li>
+            <li><strong>Proportional Aspect Ratio:</strong> Standard 600×400 ratio does not exaggerate the slope.</li>
+            <li><strong>Neutral Color:</strong> Uses blue instead of green to avoid implying "good" or "success."</li>
+            <li><strong>Honest Caption:</strong> Acknowledges limitations and does not claim causation.</li>
+        </ol>
+    </div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Line Charts: https://d3-graph-gallery.com/graph/line_basic.html
+         * - D3 Axes: https://d3js.org/d3-axis
+         * - Ethical Data Visualization: https://www.tableau.com/blog/ethical-data-visualization
+         */
+        
+        // Standard proportional dimensions
+        const margin = {top: 30, right: 30, bottom: 50, left: 60};
+        const width = 550 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+        
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+        
+        // Load data
+        d3.json("data/gaming-data.json").then(data => {
+            
+            // X scale
+            const x = d3.scaleLinear()
+                .domain([0, 20])
+                .range([0, width]);
+            
+            // Y scale - STARTS AT 0 (ethical)
+            const y = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height, 0]);
+            
+            // X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(10))
+                .append("text")
+                .attr("class", "axis-label")
+                .attr("x", width / 2)
+                .attr("y", 40)
+                .attr("fill", "#333")
+                .style("text-anchor", "middle")
+                .text("Hours Gaming Per Week");
+            
+            // Y axis - full scale from 0 to 100
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(10))
+                .append("text")
+                .attr("class", "axis-label")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -45)
+                .attr("fill", "#333")
+                .style("text-anchor", "middle")
+                .text("Exam Score (out of 100)");
+            
+            // Line generator
+            const line = d3.line()
+                .x(d => x(d.hours_gaming))
+                .y(d => y(d.exam_score));
+            
+            // Draw line - neutral blue color
+            svg.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", "#3498db")
+                .attr("stroke-width", 2)
+                .attr("d", line);
+            
+            // Draw points
+            svg.selectAll("circle")
+                .data(data)
+                .join("circle")
+                .attr("cx", d => x(d.hours_gaming))
+                .attr("cy", d => y(d.exam_score))
+                .attr("r", 5)
+                .attr("fill", "#3498db");
+            
+            // Add honest annotation
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", 20)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#7f8c8d")
+                .attr("font-size", "12px")
+                .text("n = 1 student (limited sample)");
+        });
+    </script>
+</body>
+</html>

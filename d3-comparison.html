@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Comparison - Deceptive vs Ethical</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        .comparison-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .chart-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chart-box h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .deceptive h2 {
+            color: #e74c3c;
+        }
+        .ethical h2 {
+            color: #27ae60;
+        }
+        .caption {
+            max-width: 350px;
+            text-align: center;
+            color: #555;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .analysis {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .analysis h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .techniques {
+            display: flex;
+            gap: 30px;
+        }
+        .techniques > div {
+            flex: 1;
+        }
+        .techniques h3 {
+            margin-top: 0;
+        }
+        .deceptive-list {
+            color: #c0392b;
+        }
+        .ethical-list {
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h1>Side-by-Side Comparison: Deceptive vs Ethical</h1>
+    <a href="a10.html" class="back-link">← Back to A10</a>
+    
+    <div class="comparison-container">
+        <div class="chart-box deceptive">
+            <h2>Deceptive Version</h2>
+            <div id="deceptive-chart"></div>
+            <p class="caption">"More gaming = better grades!" The dramatic slope suggests a strong effect.</p>
+        </div>
+        
+        <div class="chart-box ethical">
+            <h2>Ethical Version</h2>
+            <div id="ethical-chart"></div>
+            <p class="caption">Same data, honest representation. The actual change is modest.</p>
+        </div>
+    </div>
+    
+    <div class="analysis">
+        <h2>Comparison Analysis</h2>
+        <div class="techniques">
+            <div>
+                <h3 class="deceptive-list">Deceptive Techniques:</h3>
+                <ul>
+                    <li><strong>Truncated Y-Axis (75-95):</strong> Hides the fact that scores only improved by 15 points out of 100</li>
+                    <li><strong>Narrow Aspect Ratio:</strong> Makes the slope appear steeper than it is</li>
+                    <li><strong>Green Color:</strong> Implies "success" and positive outcome</li>
+                    <li><strong>Biased Caption:</strong> Claims causation without evidence</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="ethical-list">Ethical Corrections:</h3>
+                <ul>
+                    <li><strong>Full Y-Axis (0-100):</strong> Shows true proportion of improvement</li>
+                    <li><strong>Standard Aspect Ratio:</strong> Accurate visual representation of trend</li>
+                    <li><strong>Neutral Blue Color:</strong> No emotional manipulation</li>
+                    <li><strong>Honest Caption:</strong> Acknowledges sample size and correlation ≠ causation</li>
+                </ul>
+            </div>
+        </div>
+        <p style="margin-top: 20px; color: #555;">
+            <strong>Key Insight:</strong> Both charts show the exact same data, but the deceptive version makes a 15% improvement 
+            look like a dramatic transformation, while the ethical version shows it in proper context. This demonstrates 
+            how easily data visualization can be manipulated to support a false narrative.
+        </p>
+    </div>
+    
+    <script>
+        /*
+         * References:
+         * - D3 Line Charts: https://d3-graph-gallery.com/graph/line_basic.html
+         * - Misleading Charts: https://www.statisticshowto.com/misleading-graphs/
+         */
+        
+        // Load data and draw both charts
+        d3.json("data/gaming-data.json").then(data => {
+            drawDeceptiveChart(data);
+            drawEthicalChart(data);
+        });
+        
+        function drawDeceptiveChart(data) {
+            const margin = {top: 20, right: 20, bottom: 40, left: 50};
+            const width = 280 - margin.left - margin.right;
+            const height = 350 - margin.top - margin.bottom;
+            
+            const svg = d3.select("#deceptive-chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+            
+            const x = d3.scaleLinear()
+                .domain([4, 20])
+                .range([0, width]);
+            
+            // TRUNCATED Y-AXIS
+            const y = d3.scaleLinear()
+                .domain([75, 95])
+                .range([height, 0]);
+            
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(5));
+            
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(5));
+            
+            const line = d3.line()
+                .x(d => x(d.hours_gaming))
+                .y(d => y(d.exam_score));
+            
+            svg.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", "#27ae60")
+                .attr("stroke-width", 3)
+                .attr("d", line);
+            
+            svg.selectAll("circle")
+                .data(data)
+                .join("circle")
+                .attr("cx", d => x(d.hours_gaming))
+                .attr("cy", d => y(d.exam_score))
+                .attr("r", 5)
+                .attr("fill", "#27ae60");
+        }
+        
+        function drawEthicalChart(data) {
+            const margin = {top: 20, right: 20, bottom: 40, left: 50};
+            const width = 350 - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+            
+            const svg = d3.select("#ethical-chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+            
+            const x = d3.scaleLinear()
+                .domain([0, 20])
+                .range([0, width]);
+            
+            // FULL Y-AXIS FROM 0
+            const y = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height, 0]);
+            
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(5));
+            
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(5));
+            
+            const line = d3.line()
+                .x(d => x(d.hours_gaming))
+                .y(d => y(d.exam_score));
+            
+            svg.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", "#3498db")
+                .attr("stroke-width", 2)
+                .attr("d", line);
+            
+            svg.selectAll("circle")
+                .data(data)
+                .join("circle")
+                .attr("cx", d => x(d.hours_gaming))
+                .attr("cy", d => y(d.exam_score))
+                .attr("r", 4)
+                .attr("fill", "#3498db");
+        }
+    </script>
+</body>
+</html>
